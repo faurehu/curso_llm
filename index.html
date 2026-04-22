@@ -15,7 +15,7 @@
   <meta property="og:type" content="website">
   <meta property="og:title" content="Taller de Investigación Empírica con IA · Lima, Mayo 2026">
   <meta property="og:description" content="Aprende a obtener datos de páginas web y PDFs, y a visualizarlos usando IA — sin necesidad de ser programador.">
-  <meta property="og:image" content="https://faurehu.github.io/curso_llm/images/og-image.png">
+  <meta property="og:image" content="https://taller.matiasfaure.com/images/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:locale" content="es_PE">
@@ -23,8 +23,17 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Taller de Investigación Empírica con IA">
   <meta name="twitter:description" content="Aprende a obtener datos de páginas web y PDFs, y a visualizarlos usando IA — sin necesidad de ser programador. Lima, 2 y 9 de mayo.">
-  <meta name="twitter:image" content="https://faurehu.github.io/curso_llm/images/og-image.png">
+  <meta name="twitter:image" content="https://taller.matiasfaure.com/images/og-image.png">
   <meta name="twitter:creator" content="@mati_faure">
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-H9L9QHLWBZ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-H9L9QHLWBZ');
+  </script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -901,7 +910,7 @@
         <p class="hero-audience-label">Dirigido a</p>
         <div class="hero-audience-tags">
           <span class="hero-audience-tag">Periodistas</span>
-          <span class="hero-audience-tag">Analistas de política</span>
+          <span class="hero-audience-tag">Analistas de políticas públicas</span>
           <span class="hero-audience-tag">Estudiantes de tesis empírica</span>
           <span class="hero-audience-tag">Ciudadanos que quieran contribuir a la conversación con evidencias</span>
         </div>
@@ -1345,6 +1354,16 @@
   }, { threshold: 0.1 });
 
   document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // WhatsApp contact conversion tracking
+  document.querySelectorAll('a[href*="wa.me"]').forEach(el => {
+    el.addEventListener('click', () => {
+      const source = el.classList.contains('nav-cta') ? 'nav' : 'cta';
+      if (typeof gtag === 'function') {
+        gtag('event', 'contact_whatsapp', { source: source });
+      }
+    });
+  });
 
   // Tweet slider
   let currentTweet = 0;
