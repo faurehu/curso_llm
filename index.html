@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Taller de Investigación Empírica con IA · Lima, Mayo 2025</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:         #0c0f1a;
+      --bg-card:    #131828;
+      --bg-card2:   #1a1f35;
+      --text:       #f0e8d8;
+      --text-dim:   #a09898;
+      --text-muted: #6a6a7a;
+      --accent:     #E8A020;
+      --accent-hover: #f0b030;
+      --red:        #C8102E;
+      --border:     #2a2f45;
+      --btn-text:   #0c0f1a;
+      --mono:       'JetBrains Mono', monospace;
+      --serif:      'Source Serif 4', Georgia, serif;
+      --display:    'Playfair Display', Georgia, serif;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--serif);
+      font-size: 18px;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 1.1rem 2.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(12,15,26,0.92);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-title {
+      font-family: var(--display);
+      font-size: 1rem;
+      font-weight: 700;
+    }
+    .nav-cta {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--btn-text);
+      background: var(--accent);
+      padding: 0.5rem 1.3rem;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .nav-cta:hover { background: var(--accent-hover); transform: translateY(-1px); }
+
+    /* ── LAYOUT ── */
+    .container { max-width: 860px; margin: 0 auto; padding: 0 2rem; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 8rem 2rem 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-wrap {
+      max-width: 1240px;
+      width: 100%;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+    @media (max-width: 960px) {
+      .hero-wrap {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+      }
+      .hero-visual { max-width: 560px; margin: 0 auto; width: 100%; order: 2; }
+    }
+
+    /* Terminal / chart composition */
+    .term-window {
+      background: #06080f;
+      border: 1px solid var(--border);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.5), 0 10px 30px rgba(232,160,32,0.04);
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.1s forwards;
+    }
+    .term-header {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.7rem 1rem;
+      background: #10142a;
+      border-bottom: 1px solid var(--border);
+    }
+    .term-dot {
+      width: 11px; height: 11px;
+      border-radius: 50%;
+      background: #2e3450;
+      display: inline-block;
+    }
+    .term-dot:nth-child(1) { background: #4a3030; }
+    .term-dot:nth-child(2) { background: #4a4430; }
+    .term-dot:nth-child(3) { background: #2f4030; }
+    .term-title {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      margin-left: auto;
+      letter-spacing: 0.04em;
+    }
+    .term-body {
+      padding: 1.4rem 1.5rem 1.5rem;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      line-height: 1.8;
+    }
+    .term-prompt {
+      color: var(--text);
+      margin-bottom: 1.1rem;
+      min-height: 2.8em;
+    }
+    .term-caret {
+      color: var(--accent);
+      margin-right: 0.55rem;
+      font-weight: bold;
+    }
+    .term-cursor {
+      display: inline-block;
+      width: 7px;
+      height: 1em;
+      background: var(--accent);
+      vertical-align: -2px;
+      margin-left: 1px;
+      animation: blink 0.9s step-end infinite;
+    }
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+    .term-log {
+      color: var(--text-dim);
+      opacity: 0;
+      transform: translateY(5px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+    .term-log.visible { opacity: 1; transform: translateY(0); }
+    .term-log .term-bullet { color: var(--accent); margin-right: 0.5rem; }
+    .term-log .term-check { color: #6ab04a; margin-right: 0.5rem; }
+
+    .term-chart {
+      margin-top: 1.4rem;
+      padding: 1.1rem 1rem 0.6rem;
+      background: rgba(232,160,32,0.035);
+      border: 1px solid var(--border);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .term-chart.visible { opacity: 1; transform: translateY(0); }
+    .term-chart svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      clip-path: inset(0 100% 0 0);
+      transition: clip-path 0.9s cubic-bezier(0.45,0,0.25,1) 0.3s;
+    }
+    .term-chart.visible svg { clip-path: inset(0 0 0 0); }
+    .term-chart-title {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.6rem;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -25%; right: -15%;
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(232,160,32,0.055) 0%, transparent 68%);
+      pointer-events: none;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: 5%; left: -10%;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(200,16,46,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 2.2rem;
+      opacity: 0;
+      animation: fadeUp 0.7s ease 0.05s forwards;
+    }
+
+    .hero-question {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.1rem;
+      margin-bottom: 1.3rem;
+      opacity: 0;
+      animation: fadeUp 0.75s ease forwards;
+    }
+    .hero-question:nth-child(1) { animation-delay: 0.15s; }
+    .hero-question:nth-child(2) { animation-delay: 0.3s; }
+    .hero-question:nth-child(3) { animation-delay: 0.45s; }
+
+    .q-num {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--accent);
+      opacity: 0.75;
+      margin-top: 0.65rem;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+    .q-text {
+      font-family: var(--display);
+      font-size: clamp(1.4rem, 2.3vw, 2.05rem);
+      font-weight: 700;
+      line-height: 1.25;
+    }
+
+    .hero-sub {
+      font-size: 1rem;
+      color: var(--text-dim);
+      max-width: 580px;
+      line-height: 1.85;
+      border-left: 2px solid var(--accent);
+      padding-left: 1.2rem;
+      margin-top: 2.5rem;
+      margin-bottom: 2.8rem;
+      opacity: 0;
+      animation: fadeUp 0.75s ease 0.6s forwards;
+    }
+
+    .hero-audience {
+      margin-bottom: 2.8rem;
+      opacity: 0;
+      animation: fadeUp 0.75s ease 0.66s forwards;
+    }
+    .hero-audience-label {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.9rem;
+    }
+    .hero-audience-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .hero-audience-tag {
+      font-family: var(--serif);
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+      padding: 0.4rem 0.85rem;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .hero-audience-tag:hover { border-color: var(--accent); color: var(--text); }
+
+    .hero-meta {
+      display: flex;
+      gap: 2.5rem;
+      flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeUp 0.75s ease 0.82s forwards;
+    }
+    .meta-item {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+    .meta-item strong {
+      display: block;
+      font-family: var(--display);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-top: 0.2rem;
+      letter-spacing: 0;
+    }
+
+    /* ── DIVIDER ── */
+    .divider { height: 1px; background: var(--border); }
+
+    /* ── SECTIONS ── */
+    section { padding: 5rem 0; }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.4rem;
+    }
+    h2 {
+      font-family: var(--display);
+      font-size: clamp(1.7rem, 2.8vw, 2.35rem);
+      font-weight: 700;
+      line-height: 1.25;
+      margin-bottom: 2rem;
+    }
+
+    /* ── OBJETIVO ── */
+    .objetivo-note {
+      margin-top: 1.5rem;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      max-width: 620px;
+      padding-left: 1.5rem;
+      border-left: 1px solid var(--border);
+      line-height: 1.75;
+      font-style: italic;
+    }
+    .objetivo-text {
+      font-family: var(--display);
+      font-size: clamp(1.15rem, 2vw, 1.45rem);
+      font-style: italic;
+      font-weight: 400;
+      line-height: 1.7;
+      color: var(--text);
+      max-width: 700px;
+      border-left: 2px solid var(--border);
+      padding-left: 1.5rem;
+    }
+
+    /* ── MÓDULOS ── */
+    .modulos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+    .modulo-card {
+      background: var(--bg-card);
+      padding: 1.6rem 1.4rem;
+      transition: background 0.2s;
+      cursor: default;
+    }
+    .modulo-card:hover { background: var(--bg-card2); }
+    .modulo-num {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      margin-bottom: 0.7rem;
+    }
+    .modulo-name {
+      font-family: var(--display);
+      font-size: 1rem;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .modulo-icon {
+      color: var(--accent);
+      margin-bottom: 0.9rem;
+      display: block;
+      opacity: 0.9;
+    }
+    .metodo-icon {
+      color: var(--accent);
+      margin-bottom: 0.9rem;
+      display: block;
+    }
+
+    /* ── DATASETS ── */
+    .datasets-list {
+      border: 1px solid var(--border);
+    }
+    .dataset-item {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      padding: 1.3rem 1.8rem;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.2s;
+    }
+    .dataset-item:last-child { border-bottom: none; }
+    .dataset-item:hover { background: var(--bg-card); }
+    .dataset-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      width: 56px;
+      flex-shrink: 0;
+    }
+    .dataset-name {
+      font-family: var(--display);
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    /* ── METODOLOGÍA ── */
+    .metodo-grid {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 2rem;
+    }
+    @media (max-width: 620px) { .metodo-grid { grid-template-columns: 1fr; gap: 1.5rem; } }
+
+    .metodo-card { border-top: 2px solid var(--accent); padding-top: 1.2rem; }
+    .metodo-num {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+    .metodo-title {
+      font-family: var(--display);
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .metodo-desc { font-size: 0.88rem; color: var(--text-dim); line-height: 1.65; }
+
+    /* ── NO ES ── */
+    .noes-list { border-top: 1px solid var(--border); }
+    .noes-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.2rem;
+      padding: 1.6rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .noes-x {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--red);
+      flex-shrink: 0;
+      margin-top: 0.45rem;
+    }
+    .noes-body { flex: 1; }
+    .noes-title {
+      font-family: var(--display);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.35;
+      margin-bottom: 0.5rem;
+    }
+    .noes-desc {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      line-height: 1.75;
+    }
+
+    /* ── INSTRUCTOR ── */
+    .instructor-wrap {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 2.5rem;
+      align-items: start;
+    }
+    @media (max-width: 560px) {
+      .instructor-wrap { grid-template-columns: 1fr; gap: 1.5rem; }
+    }
+    .instructor-avatar {
+      width: 110px; height: 110px;
+      border: 1px solid var(--border);
+      background: var(--bg-card2);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--display);
+      font-size: 2.2rem; font-weight: 900;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+    .instructor-name {
+      font-family: var(--display);
+      font-size: 1.45rem; font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+    .instructor-role {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.1rem;
+    }
+    .instructor-bio { font-size: 0.9rem; color: var(--text-dim); line-height: 1.8; }
+    .instructor-tags {
+      display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem;
+    }
+    .instructor-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.05em;
+      border: 1px solid var(--border);
+      padding: 0.28rem 0.65rem;
+      color: var(--text-muted);
+    }
+
+    /* ── REQUISITOS ── */
+    .req-list { border-top: 1px solid var(--border); }
+    .req-item {
+      display: flex; align-items: flex-start; gap: 1rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.95rem;
+    }
+    .req-arrow {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--accent);
+      flex-shrink: 0;
+      margin-top: 0.18rem;
+    }
+
+    /* ── EXTENSIÓN ── */
+    .extension-note {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+    .extension-tags {
+      display: flex; flex-wrap: wrap; gap: 0.6rem;
+    }
+    .extension-tag {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.05em;
+      border: 1px solid var(--border);
+      padding: 0.4rem 0.9rem;
+      color: var(--text-dim);
+    }
+
+    /* ── PORTFOLIO ── */
+    .portfolio-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 0.8rem;
+    }
+    @media (max-width: 640px) {
+      .portfolio-grid { grid-template-columns: 1fr; }
+    }
+    .portfolio-card {
+      display: block;
+      text-decoration: none;
+      color: var(--text);
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      overflow: hidden;
+      transition: border-color 0.25s, transform 0.25s;
+    }
+    .portfolio-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    .portfolio-thumb {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+      object-position: top;
+      display: block;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+    }
+    .portfolio-body {
+      padding: 0.9rem 1rem 1rem;
+    }
+    .portfolio-title {
+      font-family: var(--display);
+      font-size: 0.95rem;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 0.35rem;
+    }
+    .portfolio-desc {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      line-height: 1.55;
+      margin-bottom: 0.6rem;
+    }
+    .portfolio-url {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.04em;
+      color: var(--accent);
+    }
+
+    /* ── TWEET SLIDER ── */
+    .tweet-slider { margin-top: 2rem; }
+    .tweet-track { overflow: hidden; }
+    .tweet-slides-inner {
+      display: flex;
+      transition: transform 0.35s ease;
+    }
+    .tweet-slide {
+      min-width: 100%;
+      flex-shrink: 0;
+      display: flex;
+      justify-content: center;
+    }
+    .tweet-card {
+      background: var(--bg-card2);
+      border: 1px solid var(--border);
+      padding: 1.4rem 1.6rem;
+      max-width: 560px;
+      text-decoration: none;
+      display: block;
+      transition: border-color 0.2s;
+    }
+    .tweet-card:hover { border-color: #4a5070; }
+    .tweet-card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      margin-bottom: 0.9rem;
+    }
+    .tweet-card-avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      object-fit: cover;
+    }
+    .tweet-card-name {
+      font-family: var(--serif);
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.2;
+    }
+    .tweet-card-handle {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--text-muted);
+    }
+    .tweet-card-x {
+      margin-left: auto;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .tweet-card-text {
+      font-family: var(--serif);
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+      margin-bottom: 0.9rem;
+    }
+    .tweet-card-media {
+      width: 100%;
+      max-height: 300px;
+      object-fit: cover;
+      border: 1px solid var(--border);
+      margin-bottom: 0.9rem;
+      display: block;
+    }
+    .tweet-card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 0.7rem;
+      border-top: 1px solid var(--border);
+    }
+    .tweet-card-date {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+    .tweet-card-stats {
+      display: flex;
+      gap: 1rem;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+    .tweet-card-stat {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .tweet-card-stat svg { color: var(--text-muted); }
+    .tweet-nav {
+      display: flex; align-items: center; gap: 1rem; margin-top: 0.8rem;
+    }
+    .tweet-btn {
+      font-family: var(--mono); font-size: 0.8rem;
+      color: var(--text); background: none;
+      border: 1px solid var(--border);
+      padding: 0.35rem 0.75rem; cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .tweet-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .tweet-counter {
+      font-family: var(--mono); font-size: 0.65rem;
+      color: var(--text-muted); letter-spacing: 0.1em;
+    }
+
+    /* ── PRECIOS ── */
+    .precios-grid {
+      display: grid;
+      grid-template-columns: repeat(2,1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+    @media (max-width: 680px) { .precios-grid { grid-template-columns: 1fr; } }
+
+    .precio-card {
+      background: var(--bg-card);
+      padding: 2rem 1.7rem;
+      position: relative;
+    }
+    .precio-card.featured { background: var(--bg-card2); }
+    .precio-badge {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--btn-text);
+      background: var(--accent);
+      padding: 0.18rem 0.55rem;
+      position: absolute;
+      top: 1rem; right: 1rem;
+    }
+    .precio-label {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 1.1rem;
+    }
+    .precio-amount {
+      font-family: var(--display);
+      font-size: 3rem; font-weight: 900;
+      line-height: 1;
+      margin-bottom: 0.2rem;
+    }
+    .precio-unit {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+    .precio-desc { font-size: 0.85rem; color: var(--text-dim); line-height: 1.6; }
+
+    /* ── CTA FINAL ── */
+    .cta-block {
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+      padding: 6rem 2rem;
+      text-align: center;
+    }
+    .cta-block h2 { margin-bottom: 0.8rem; }
+    .cta-block p { color: var(--text-dim); font-size: 0.95rem; margin-bottom: 2.5rem; }
+    .cta-btn {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--btn-text);
+      background: var(--accent);
+      padding: 1rem 2.8rem;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .cta-btn:hover { background: var(--accent-hover); transform: translateY(-2px); }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 1.8rem 2rem;
+      text-align: center;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .reveal {
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <span class="nav-title">Taller de Investigación Empírica con IA</span>
+  <a href="https://wa.me/51964847543?text=Hola%2C%20me%20interesa%20inscribirme%20al%20Taller%20de%20Investigaci%C3%B3n%20Emp%C3%ADrica%20con%20IA" target="_blank" class="nav-cta">
+    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;margin-right:6px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    964 847 543
+  </a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-wrap">
+
+    <div class="hero-content">
+      <p class="hero-eyebrow">Taller presencial · Lima, Perú · Mayo 2026</p>
+
+      <div>
+        <div class="hero-question">
+          <span class="q-num">01</span>
+          <span class="q-text">¿Quieres obtener data de portales públicos para hacer análisis estadístico?</span>
+        </div>
+        <div class="hero-question">
+          <span class="q-num">02</span>
+          <span class="q-text">¿Quieres extraer datos de PDFs sistemáticamente?</span>
+        </div>
+        <div class="hero-question">
+          <span class="q-num">03</span>
+          <span class="q-text">¿Quieres visualizar datos y presentarlos gráficamente?</span>
+        </div>
+      </div>
+
+      <p class="hero-sub">
+        Aprende a obtener datos de páginas web y archivos PDF, y a visualizarlos, usando la IA efectivamente — sin necesidad de ser programador.
+      </p>
+
+      <div class="hero-audience">
+        <p class="hero-audience-label">Dirigido a</p>
+        <div class="hero-audience-tags">
+          <span class="hero-audience-tag">Periodistas</span>
+          <span class="hero-audience-tag">Analistas de política</span>
+          <span class="hero-audience-tag">Estudiantes de tesis empírica</span>
+          <span class="hero-audience-tag">Ciudadanos que quieran contribuir a la conversación con evidencias</span>
+        </div>
+      </div>
+
+      <div class="hero-meta">
+        <div class="meta-item">Fechas <strong>2 y 9 de mayo</strong></div>
+        <div class="meta-item">Horario <strong>9 am — 1 pm</strong></div>
+        <div class="meta-item">Modalidad <strong>Presencial</strong></div>
+        <div class="meta-item">Duración <strong>2 sesiones · 4h c/u</strong></div>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="term-window">
+        <div class="term-header">
+          <span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>
+          <span class="term-title" id="term-title">claude-code · peru-data</span>
+        </div>
+        <div class="term-body" id="term-body"></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- OBJETIVO -->
+<section>
+  <div class="container">
+    <p class="section-label reveal">Objetivo</p>
+    <p class="objetivo-text reveal">
+      Que al finalizar el curso puedas, de manera autónoma, obtener datos de páginas web y archivos PDF, estructurarlos correctamente, y visualizarlos — usando la inteligencia artificial como tu herramienta principal.
+    </p>
+    <p class="objetivo-note reveal">
+      Esta clase te va a enseñar a usar Claude Code para estos propósitos, pero te permitirá conocer el potencial de los agentes de IA para también hacer otros tipos de tareas.
+    </p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- MÓDULOS -->
+<section>
+  <div class="container">
+    <p class="section-label reveal">Contenido</p>
+    <h2 class="reveal">Lo que vas a aprender</h2>
+    <div class="modulos-grid reveal">
+      <div class="modulo-card">
+        <div class="modulo-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+        <div class="modulo-num">01</div>
+        <div class="modulo-name">Vocabulario & el mundo digital</div>
+      </div>
+      <div class="modulo-card">
+        <div class="modulo-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg></div>
+        <div class="modulo-num">02</div>
+        <div class="modulo-name">Terminal</div>
+      </div>
+      <div class="modulo-card">
+        <div class="modulo-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></div>
+        <div class="modulo-num">03</div>
+        <div class="modulo-name">LLMs & automatización</div>
+      </div>
+      <div class="modulo-card">
+        <div class="modulo-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+        <div class="modulo-num">04</div>
+        <div class="modulo-name">Claude Code</div>
+      </div>
+      <div class="modulo-card">
+        <div class="modulo-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></div>
+        <div class="modulo-num">05</div>
+        <div class="modulo-name">Estructura y lectura de datos</div>
+      </div>
+      <div class="modulo-card">
+        <div class="modulo-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+        <div class="modulo-num">06</div>
+        <div class="modulo-name">Scrapeo web</div>
+      </div>
+      <div class="modulo-card">
+        <div class="modulo-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+        <div class="modulo-num">07</div>
+        <div class="modulo-name">Extracción de PDFs</div>
+      </div>
+      <div class="modulo-card">
+        <div class="modulo-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/><line x1="3" y1="20" x2="21" y2="20"/></svg></div>
+        <div class="modulo-num">08</div>
+        <div class="modulo-name">Visualización</div>
+      </div>
+      <div class="modulo-card">
+        <div class="modulo-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+        <div class="modulo-num">09</div>
+        <div class="modulo-name">Precauciones estadísticas</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DATASETS -->
+<section>
+  <div class="container">
+    <p class="section-label reveal">Ejemplos reales</p>
+    <h2 class="reveal">Vamos a analizar</h2>
+    <div class="datasets-list reveal">
+      <div class="dataset-item">
+        <span class="dataset-tag">Elec</span>
+        <span class="dataset-name">Data de elecciones</span>
+      </div>
+      <div class="dataset-item">
+        <span class="dataset-tag">Cong</span>
+        <span class="dataset-name">Data del Congreso</span>
+      </div>
+      <div class="dataset-item">
+        <span class="dataset-tag">API</span>
+        <span class="dataset-name">API con autenticación</span>
+      </div>
+      <div class="dataset-item">
+        <span class="dataset-tag">Min</span>
+        <span class="dataset-name">Data del REINFO</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- METODOLOGÍA -->
+<section>
+  <div class="container">
+    <p class="section-label reveal">Cómo funciona</p>
+    <h2 class="reveal">Metodología</h2>
+    <div class="metodo-grid reveal">
+      <div class="metodo-card">
+        <div class="metodo-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 1 4 12.74V18H8v-3.26A7 7 0 0 1 12 2z"/></svg></div>
+        <div class="metodo-num">01 —</div>
+        <div class="metodo-title">Conceptos</div>
+        <div class="metodo-desc">Cada tema empieza con una explicación clara: qué es, para qué sirve, cuándo lo necesitas.</div>
+      </div>
+      <div class="metodo-card">
+        <div class="metodo-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><polygon points="10 8 15 11 10 14" fill="currentColor" stroke="none"/></svg></div>
+        <div class="metodo-num">02 —</div>
+        <div class="metodo-title">Reproducción</div>
+        <div class="metodo-desc">Ves el proceso en tiempo real, con fuentes de datos peruanas reales.</div>
+      </div>
+      <div class="metodo-card">
+        <div class="metodo-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/></svg></div>
+        <div class="metodo-num">03 —</div>
+        <div class="metodo-title">Ejercicios guiados</div>
+        <div class="metodo-desc">Práctica acompañada de tutor. Trabaja en problemas reales.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- NO ES -->
+<section>
+  <div class="container">
+    <p class="section-label reveal">Aclaraciones</p>
+    <h2 class="reveal">Este curso no es sobre</h2>
+    <div class="noes-list reveal">
+      <div class="noes-item">
+        <span class="noes-x">✕</span>
+        <div class="noes-body">
+          <div class="noes-title">Análisis de datos, estadística o machine learning</div>
+          <div class="noes-desc">No aprenderás a estimar cantidades desconocidas. Los gráficos que harás serán descriptivos — describen lo que contienen tus muestras. Tocaremos algunos conceptos estadísticos necesarios para interpretar resultados, pero no son el eje del curso.</div>
+        </div>
+      </div>
+      <div class="noes-item">
+        <span class="noes-x">✕</span>
+        <div class="noes-body">
+          <div class="noes-title">Política</div>
+          <div class="noes-desc">Aunque los objetos de estudio son temas políticos o de política pública, no discutiremos teoría política ni haremos afirmaciones científicas sobre comportamiento o instituciones. Esas conclusiones las sacas tú con tus propias investigaciones. Además, todos los métodos aplican a cualquier otro campo — la política es simplemente el tema del momento.</div>
+        </div>
+      </div>
+      <div class="noes-item">
+        <span class="noes-x">✕</span>
+        <div class="noes-body">
+          <div class="noes-title">Programación</div>
+          <div class="noes-desc">No vas a escribir código. Vas a aprender a manejar un agente de IA que escribe y ejecuta código por ti. Es una gran oportunidad para quienes siempre se sintieron intimidados por la programación pero son creativos: ahora pueden producir productos digitales complejos sin escribir una sola línea.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- INSTRUCTOR -->
+<section>
+  <div class="container">
+    <p class="section-label reveal">Quién dicta</p>
+    <div class="instructor-wrap reveal">
+      <div class="instructor-avatar">MF</div>
+      <div>
+        <div class="instructor-name">Matias Faure</div>
+        <div class="instructor-role">Analista político · Consultor de Tecnología</div>
+        <div class="instructor-bio">
+          Doctorado en Economía Política en NYU. Consultor para empresas en procesos de automatización y manejo de información. Con experiencia dictando cursos de computación y teoría de juegos.
+        </div>
+        <div class="instructor-tags">
+          <span class="instructor-tag">NYU Political Science</span>
+          <span class="instructor-tag">Datos cuantitativos</span>
+          <span class="instructor-tag">Automatización</span>
+          <span class="instructor-tag">Perú</span>
+        </div>
+
+        <div style="margin-top: 1.8rem">
+          <p class="section-label" style="margin-bottom: 0.7rem;">Proyectos recientes</p>
+          <div class="portfolio-grid">
+            <a href="https://congreso.matiasfaure.com" target="_blank" class="portfolio-card">
+              <img class="portfolio-thumb" src="images/congreso.png" alt="Análisis del Congreso 2021-2026">
+              <div class="portfolio-body">
+                <div class="portfolio-title">Análisis del Congreso 2021-2026</div>
+                <div class="portfolio-desc">Mapa interactivo de votaciones y proyectos de ley del Congreso peruano.</div>
+                <div class="portfolio-url">congreso.matiasfaure.com</div>
+              </div>
+            </a>
+            <a href="https://simulador.matiasfaure.com" target="_blank" class="portfolio-card">
+              <img class="portfolio-thumb" src="images/simulador.png" alt="Simulador Electoral Bicameral 2026">
+              <div class="portfolio-body">
+                <div class="portfolio-title">Simulador Electoral 2026</div>
+                <div class="portfolio-desc">Modela los resultados de las elecciones bicamerales ajustando participación y votos.</div>
+                <div class="portfolio-url">simulador.matiasfaure.com</div>
+              </div>
+            </a>
+            <a href="https://matiasfaure.com/peru-data" target="_blank" class="portfolio-card">
+              <img class="portfolio-thumb" src="images/peru-data.png" alt="Perú en Datos">
+              <div class="portfolio-body">
+                <div class="portfolio-title">Perú en Datos</div>
+                <div class="portfolio-desc">Colección de visualizaciones sobre estadísticas y territorio peruano.</div>
+                <div class="portfolio-url">matiasfaure.com/peru-data</div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tweet-slider reveal">
+      <p class="section-label" style="margin-bottom: 1rem;">Hilos recientes</p>
+      <div class="tweet-track">
+      <div class="tweet-slides-inner">
+        <div class="tweet-slide">
+          <a class="tweet-card" href="https://x.com/mati_faure/status/2045961726214951235" target="_blank">
+            <div class="tweet-card-header">
+              <img class="tweet-card-avatar" src="https://pbs.twimg.com/profile_images/1849237696897507328/gr5QRyZd_bigger.jpg" alt="Matias Faure">
+              <div><div class="tweet-card-name">Matias Faure</div><div class="tweet-card-handle">@mati_faure</div></div>
+              <svg class="tweet-card-x" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </div>
+            <div class="tweet-card-text">Circula bastante un tipo de análisis donde se cuestiona que hayan mesas donde RLA y Sanchez obtuvieron votos bastante diferentes a lo esperado, generando sospechas de un fraude sistematizado. Repasemos qué es lo que hacen y luego hablemos sobre las debilidades en sus métodos.</div>
+            <img class="tweet-card-media" src="https://pbs.twimg.com/media/HGS24clW0AAJ7UE.jpg" alt="" loading="lazy">
+            <div class="tweet-card-footer">
+              <span class="tweet-card-date">19 de abril, 2026</span>
+              <span class="tweet-card-stats">
+                <span class="tweet-card-stat"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>17</span>
+                <span class="tweet-card-stat"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>217</span>
+                <span class="tweet-card-stat"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>445</span>
+              </span>
+            </div>
+          </a>
+        </div>
+        <div class="tweet-slide">
+          <a class="tweet-card" href="https://x.com/mati_faure/status/2045680386827501604" target="_blank">
+            <div class="tweet-card-header">
+              <img class="tweet-card-avatar" src="https://pbs.twimg.com/profile_images/1849237696897507328/gr5QRyZd_bigger.jpg" alt="Matias Faure">
+              <div><div class="tweet-card-name">Matias Faure</div><div class="tweet-card-handle">@mati_faure</div></div>
+              <svg class="tweet-card-x" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </div>
+            <div class="tweet-card-text">Aún hay 5,763 actas observadas con votos no contabilizados pero con PDFs donde se puede observar la letra de los miembros de mesa y su conteo. Me descargué estas actas y extraje los votos. ¿Cuántos votos hay para Sanchez y RLA en estas actas?</div>
+            <img class="tweet-card-media" src="https://pbs.twimg.com/media/HGOwSRhW4AAKvWP.jpg" alt="" loading="lazy">
+            <div class="tweet-card-footer">
+              <span class="tweet-card-date">19 de abril, 2026</span>
+              <span class="tweet-card-stats">
+                <span class="tweet-card-stat"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>69</span>
+                <span class="tweet-card-stat"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>473</span>
+                <span class="tweet-card-stat"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>1.1k</span>
+              </span>
+            </div>
+          </a>
+        </div>
+        <div class="tweet-slide">
+          <a class="tweet-card" href="https://x.com/mati_faure/status/2044282221771509977" target="_blank">
+            <div class="tweet-card-header">
+              <img class="tweet-card-avatar" src="https://pbs.twimg.com/profile_images/1849237696897507328/gr5QRyZd_bigger.jpg" alt="Matias Faure">
+              <div><div class="tweet-card-name">Matias Faure</div><div class="tweet-card-handle">@mati_faure</div></div>
+              <svg class="tweet-card-x" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </div>
+            <div class="tweet-card-text">Verifiquemos lo que dice López Aliaga, quien afirma que las instalaciones tardías de mesas en cuatro distritos de Lima le costaron hasta 500,000 votos. Tengo la hora de instalación de mesas en San Juan de Miraflores, Villa el Salvador, Pachacámac y Lurín. Así se instalaron.</div>
+            <img class="tweet-card-media" src="https://pbs.twimg.com/media/HF68SpaXkAAkuDb.jpg" alt="" loading="lazy">
+            <div class="tweet-card-footer">
+              <span class="tweet-card-date">15 de abril, 2026</span>
+              <span class="tweet-card-stats">
+                <span class="tweet-card-stat"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>85</span>
+                <span class="tweet-card-stat"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>445</span>
+                <span class="tweet-card-stat"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>902</span>
+              </span>
+            </div>
+          </a>
+        </div>
+        <div class="tweet-slide">
+          <a class="tweet-card" href="https://x.com/mati_faure/status/2044767601474117686" target="_blank">
+            <div class="tweet-card-header">
+              <img class="tweet-card-avatar" src="https://pbs.twimg.com/profile_images/1849237696897507328/gr5QRyZd_bigger.jpg" alt="Matias Faure">
+              <div><div class="tweet-card-name">Matias Faure</div><div class="tweet-card-handle">@mati_faure</div></div>
+              <svg class="tweet-card-x" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </div>
+            <div class="tweet-card-text">Harvey Colchado es el candidato con la mayor cantidad de votos preferenciales. Al 71.2% de actas, así se veía la distribución de sus votos. Tener en cuenta, las mesas que se instalaron tarde son las que aún no se contabilizan, por lo que no se reflejaría su apoyo en el sur.</div>
+            <img class="tweet-card-media" src="https://pbs.twimg.com/media/HGB4mXSW4AAy7Y1.jpg" alt="" loading="lazy">
+            <div class="tweet-card-footer">
+              <span class="tweet-card-date">16 de abril, 2026</span>
+              <span class="tweet-card-stats">
+                <span class="tweet-card-stat"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>2</span>
+                <span class="tweet-card-stat"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>20</span>
+                <span class="tweet-card-stat"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>47</span>
+              </span>
+            </div>
+          </a>
+        </div>
+        <div class="tweet-slide">
+          <a class="tweet-card" href="https://x.com/mati_faure/status/2041679010455806380" target="_blank">
+            <div class="tweet-card-header">
+              <img class="tweet-card-avatar" src="https://pbs.twimg.com/profile_images/1849237696897507328/gr5QRyZd_bigger.jpg" alt="Matias Faure">
+              <div><div class="tweet-card-name">Matias Faure</div><div class="tweet-card-handle">@mati_faure</div></div>
+              <svg class="tweet-card-x" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </div>
+            <div class="tweet-card-text">El voto preferencial determina qué candidatos, dentro de una lista partidaria, acceden finalmente a un escaño. ¿Cuántos eligen un partido solo por reconocer al candidato presidencial? ¿Cuántos lo hacen por un candidato congresal? El voto preferencial puede darnos pistas.</div>
+            <img class="tweet-card-media" src="https://pbs.twimg.com/media/HFV2yniWkAE_FZ4.jpg" alt="" loading="lazy">
+            <div class="tweet-card-footer">
+              <span class="tweet-card-date">8 de abril, 2026</span>
+              <span class="tweet-card-stats">
+                <span class="tweet-card-stat"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>1</span>
+                <span class="tweet-card-stat"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>1</span>
+                <span class="tweet-card-stat"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>3</span>
+              </span>
+            </div>
+          </a>
+        </div>
+        <div class="tweet-slide">
+          <a class="tweet-card" href="https://x.com/mati_faure/status/1978993703134855299" target="_blank">
+            <div class="tweet-card-header">
+              <img class="tweet-card-avatar" src="https://pbs.twimg.com/profile_images/1849237696897507328/gr5QRyZd_bigger.jpg" alt="Matias Faure">
+              <div><div class="tweet-card-name">Matias Faure</div><div class="tweet-card-handle">@mati_faure</div></div>
+              <svg class="tweet-card-x" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </div>
+            <div class="tweet-card-text">¿Por qué los peruanos protestamos tanto? Hablemos de representatividad con datos. Años de protestas, siempre por motivos distintos pero siempre con la misma raíz: los congresistas faltan a su deber. Hoy repaso una de las principales causas.</div>
+            <img class="tweet-card-media" src="images/protesta.jpg" alt="" loading="lazy">
+            <div class="tweet-card-footer">
+              <span class="tweet-card-date">17 de octubre, 2025</span>
+              <span class="tweet-card-stats">
+                <span class="tweet-card-stat"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>4</span>
+                <span class="tweet-card-stat"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>47</span>
+                <span class="tweet-card-stat"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>56</span>
+              </span>
+            </div>
+          </a>
+        </div>
+      </div>
+      </div>
+      <div class="tweet-nav">
+        <button class="tweet-btn" id="tweet-prev">←</button>
+        <span class="tweet-counter" id="tweet-counter">1 / 6</span>
+        <button class="tweet-btn" id="tweet-next">→</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- REQUISITOS -->
+<section>
+  <div class="container">
+    <p class="section-label reveal">Antes de venir</p>
+    <h2 class="reveal">Requisitos</h2>
+    <div class="req-list reveal">
+      <div class="req-item">
+        <span class="req-arrow">→</span>
+        Laptop (Windows o Mac)
+      </div>
+      <div class="req-item">
+        <span class="req-arrow">→</span>
+        Suscripción de Claude Code — $20/mes (puedes cancelar después del curso)
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PRECIOS -->
+<section id="precios">
+  <div class="container">
+    <p class="section-label reveal">Inversión</p>
+    <h2 class="reveal">Precios</h2>
+    <div class="precios-grid reveal">
+      <div class="precio-card">
+        <div class="precio-label">Individual</div>
+        <div class="precio-amount">600</div>
+        <div class="precio-unit">soles</div>
+        <div class="precio-desc">Precio regular.</div>
+      </div>
+      <div class="precio-card">
+        <div class="precio-label">Grupo de 4</div>
+        <div class="precio-amount">500</div>
+        <div class="precio-unit">soles · por persona</div>
+        <div class="precio-desc">Cuatro inscritos del mismo grupo.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<div class="cta-block">
+  <div class="container">
+    <h2 class="reveal">¿Listo para empezar?</h2>
+    <p class="reveal">Cupos limitados. Lima, 2 y 9 de mayo de 2025.</p>
+    <a href="https://wa.me/51964847543?text=Hola%2C%20me%20interesa%20inscribirme%20al%20Taller%20de%20Investigaci%C3%B3n%20Emp%C3%ADrica%20con%20IA" target="_blank" class="cta-btn reveal">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;margin-right:8px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Escribir al 964 847 543
+    </a>
+  </div>
+</div>
+
+<footer>
+  <p>© 2026 Matias Faure &nbsp;·&nbsp; Taller de Investigación Empírica con IA</p>
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Tweet slider
+  let currentTweet = 0;
+  const slides = document.querySelectorAll('.tweet-slide');
+  const inner = document.querySelector('.tweet-slides-inner');
+  const counter = document.getElementById('tweet-counter');
+
+  function showTweet(n) {
+    currentTweet = (n + slides.length) % slides.length;
+    inner.style.transform = `translateX(-${currentTweet * 100}%)`;
+    counter.textContent = (currentTweet + 1) + ' / ' + slides.length;
+  }
+
+  document.getElementById('tweet-prev').addEventListener('click', () => showTweet(currentTweet - 1));
+  document.getElementById('tweet-next').addEventListener('click', () => showTweet(currentTweet + 1));
+  counter.textContent = '1 / ' + slides.length;
+
+  // Terminal task cycler
+  (function() {
+    const termBody = document.getElementById('term-body');
+    const termTitle = document.getElementById('term-title');
+    if (!termBody) return;
+
+    const CHECK = '<span class="term-check">✓</span>';
+    const BULLET = '<span class="term-bullet">●</span>';
+
+    const TASKS = [
+      {
+        title: 'claude-code · jne-elecciones',
+        prompt: 'Descarga las actas pendientes del JNE y grafica los votos por candidato',
+        logs: [
+          CHECK + 'Descargados 5,763 PDFs del JNE',
+          CHECK + 'Extraídos votos con OCR',
+          BULLET + 'Generando gráfico...'
+        ],
+        chartTitle: 'Votos por candidato · actas pendientes',
+        chartSvg: `<svg viewBox="0 0 320 130" xmlns="http://www.w3.org/2000/svg">
+          <line x1="30" y1="115" x2="315" y2="115" stroke="#3a3f50" stroke-width="0.6"/>
+          <line x1="30" y1="10" x2="30" y2="115" stroke="#3a3f50" stroke-width="0.6"/>
+          <text x="26" y="18" text-anchor="end" font-family="monospace" font-size="7" fill="#6a6a7a">8k</text>
+          <text x="26" y="67" text-anchor="end" font-family="monospace" font-size="7" fill="#6a6a7a">4k</text>
+          <text x="26" y="115" text-anchor="end" font-family="monospace" font-size="7" fill="#6a6a7a">0</text>
+          <rect x="50" y="38" width="34" height="77" fill="#E8A020"/>
+          <rect x="92" y="25" width="34" height="90" fill="#E8A020"/>
+          <rect x="134" y="60" width="34" height="55" fill="#E8A020" opacity="0.8"/>
+          <rect x="176" y="78" width="34" height="37" fill="#E8A020" opacity="0.65"/>
+          <rect x="218" y="92" width="34" height="23" fill="#E8A020" opacity="0.5"/>
+          <rect x="260" y="102" width="34" height="13" fill="#E8A020" opacity="0.4"/>
+          <text x="67" y="127" text-anchor="middle" font-family="monospace" font-size="6" fill="#8a8a8a">SAN</text>
+          <text x="109" y="127" text-anchor="middle" font-family="monospace" font-size="6" fill="#8a8a8a">RLA</text>
+          <text x="151" y="127" text-anchor="middle" font-family="monospace" font-size="6" fill="#8a8a8a">COL</text>
+          <text x="193" y="127" text-anchor="middle" font-family="monospace" font-size="6" fill="#8a8a8a">BOL</text>
+          <text x="235" y="127" text-anchor="middle" font-family="monospace" font-size="6" fill="#8a8a8a">MEN</text>
+          <text x="277" y="127" text-anchor="middle" font-family="monospace" font-size="6" fill="#8a8a8a">OTR</text>
+        </svg>`
+      },
+      {
+        title: 'claude-code · congreso-scrape',
+        prompt: 'Scrapea las asistencias a sesiones del Congreso y compara por partido',
+        logs: [
+          CHECK + 'Conectado a sede.congreso.gob.pe',
+          CHECK + 'Paginadas 48 sesiones del pleno',
+          CHECK + 'Extraídos 6,240 registros de asistencia',
+          BULLET + 'Comparando por bancada...'
+        ],
+        chartTitle: 'Asistencia promedio por bancada · 2025',
+        chartSvg: `<svg viewBox="0 0 320 130" xmlns="http://www.w3.org/2000/svg">
+          <line x1="82" y1="12" x2="82" y2="122" stroke="#3a3f50" stroke-width="0.6"/>
+          <line x1="82" y1="122" x2="312" y2="122" stroke="#3a3f50" stroke-width="0.6"/>
+          <text x="78" y="25" text-anchor="end" font-family="monospace" font-size="7" fill="#a09898">FP</text>
+          <rect x="82" y="17" width="198" height="11" fill="#E8A020"/>
+          <text x="284" y="25" font-family="monospace" font-size="7" fill="#a09898">94%</text>
+          <text x="78" y="45" text-anchor="end" font-family="monospace" font-size="7" fill="#a09898">APP</text>
+          <rect x="82" y="37" width="180" height="11" fill="#E8A020" opacity="0.9"/>
+          <text x="266" y="45" font-family="monospace" font-size="7" fill="#a09898">86%</text>
+          <text x="78" y="65" text-anchor="end" font-family="monospace" font-size="7" fill="#a09898">SP</text>
+          <rect x="82" y="57" width="165" height="11" fill="#E8A020" opacity="0.8"/>
+          <text x="251" y="65" font-family="monospace" font-size="7" fill="#a09898">79%</text>
+          <text x="78" y="85" text-anchor="end" font-family="monospace" font-size="7" fill="#a09898">AP</text>
+          <rect x="82" y="77" width="152" height="11" fill="#E8A020" opacity="0.7"/>
+          <text x="238" y="85" font-family="monospace" font-size="7" fill="#a09898">73%</text>
+          <text x="78" y="105" text-anchor="end" font-family="monospace" font-size="7" fill="#a09898">PL</text>
+          <rect x="82" y="97" width="138" height="11" fill="#E8A020" opacity="0.55"/>
+          <text x="224" y="105" font-family="monospace" font-size="7" fill="#a09898">66%</text>
+        </svg>`
+      },
+      {
+        title: 'claude-code · mef-presupuesto',
+        prompt: 'Extrae el presupuesto de educación de los PDFs del MEF y grafica su evolución',
+        logs: [
+          CHECK + 'Descargados 10 PDFs del MEF 2015-2024',
+          CHECK + 'Parseados con OCR',
+          CHECK + 'Estructurados 240 registros',
+          BULLET + 'Generando serie temporal...'
+        ],
+        chartTitle: 'Presupuesto educación · S/ miles de millones',
+        chartSvg: `<svg viewBox="0 0 320 130" xmlns="http://www.w3.org/2000/svg">
+          <line x1="30" y1="115" x2="315" y2="115" stroke="#3a3f50" stroke-width="0.6"/>
+          <line x1="30" y1="10" x2="30" y2="115" stroke="#3a3f50" stroke-width="0.6"/>
+          <text x="26" y="18" text-anchor="end" font-family="monospace" font-size="7" fill="#6a6a7a">40</text>
+          <text x="26" y="67" text-anchor="end" font-family="monospace" font-size="7" fill="#6a6a7a">25</text>
+          <text x="26" y="115" text-anchor="end" font-family="monospace" font-size="7" fill="#6a6a7a">10</text>
+          <polyline points="45,90 75,82 105,70 135,58 165,50 195,46 225,38 255,32 285,26 310,20" fill="none" stroke="#E8A020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="45" cy="90" r="2.5" fill="#E8A020"/>
+          <circle cx="75" cy="82" r="2.5" fill="#E8A020"/>
+          <circle cx="105" cy="70" r="2.5" fill="#E8A020"/>
+          <circle cx="135" cy="58" r="2.5" fill="#E8A020"/>
+          <circle cx="165" cy="50" r="2.5" fill="#E8A020"/>
+          <circle cx="195" cy="46" r="2.5" fill="#E8A020"/>
+          <circle cx="225" cy="38" r="2.5" fill="#E8A020"/>
+          <circle cx="255" cy="32" r="2.5" fill="#E8A020"/>
+          <circle cx="285" cy="26" r="2.5" fill="#E8A020"/>
+          <circle cx="310" cy="20" r="2.5" fill="#E8A020"/>
+          <text x="45" y="127" text-anchor="middle" font-family="monospace" font-size="6" fill="#8a8a8a">2015</text>
+          <text x="135" y="127" text-anchor="middle" font-family="monospace" font-size="6" fill="#8a8a8a">2018</text>
+          <text x="225" y="127" text-anchor="middle" font-family="monospace" font-size="6" fill="#8a8a8a">2021</text>
+          <text x="310" y="127" text-anchor="middle" font-family="monospace" font-size="6" fill="#8a8a8a">2024</text>
+        </svg>`
+      }
+    ];
+
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+    const nextFrame = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+    function typewrite(el, text, speed) {
+      return new Promise(resolve => {
+        let i = 0;
+        const tick = setInterval(() => {
+          if (i < text.length) {
+            el.textContent += text[i++];
+          } else {
+            clearInterval(tick);
+            resolve();
+          }
+        }, speed);
+      });
+    }
+
+    async function runTask(i) {
+      const task = TASKS[i];
+      termTitle.textContent = task.title;
+      termBody.innerHTML = '';
+
+      const promptEl = document.createElement('div');
+      promptEl.className = 'term-prompt';
+      promptEl.innerHTML = '<span class="term-caret">❯</span><span class="tw"></span><span class="term-cursor"></span>';
+      termBody.appendChild(promptEl);
+
+      await sleep(450);
+
+      const tw = promptEl.querySelector('.tw');
+      await typewrite(tw, task.prompt, 28);
+      await sleep(650);
+
+      const cursor = promptEl.querySelector('.term-cursor');
+      if (cursor) cursor.remove();
+
+      for (const log of task.logs) {
+        const logEl = document.createElement('div');
+        logEl.className = 'term-log';
+        logEl.innerHTML = log;
+        termBody.appendChild(logEl);
+        await nextFrame();
+        logEl.classList.add('visible');
+        await sleep(380);
+      }
+
+      await sleep(250);
+
+      const chartEl = document.createElement('div');
+      chartEl.className = 'term-chart';
+      chartEl.innerHTML = '<div class="term-chart-title">' + task.chartTitle + '</div>' + task.chartSvg;
+      termBody.appendChild(chartEl);
+      await nextFrame();
+      chartEl.classList.add('visible');
+
+      await sleep(6000);
+      runTask((i + 1) % TASKS.length);
+    }
+
+    setTimeout(() => runTask(0), 400);
+  })();
+</script>
+
+</body>
+</html>
