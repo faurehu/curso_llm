@@ -770,6 +770,14 @@
       line-height: 1;
       margin-bottom: 0.2rem;
     }
+    .precio-sign {
+      display: inline-block;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      margin-right: 0.3rem;
+      transform: translateY(-0.9rem);
+    }
     .precio-unit {
       font-family: var(--mono);
       font-size: 0.72rem;
@@ -1274,13 +1282,13 @@
     <div class="precios-grid reveal">
       <div class="precio-card">
         <div class="precio-label">Individual</div>
-        <div class="precio-amount">600</div>
+        <div class="precio-amount"><span class="precio-sign">S/</span>600</div>
         <div class="precio-unit">soles</div>
         <div class="precio-desc">Precio regular.</div>
       </div>
       <div class="precio-card">
         <div class="precio-label">Grupo de 4</div>
-        <div class="precio-amount">500</div>
+        <div class="precio-amount"><span class="precio-sign">S/</span>500</div>
         <div class="precio-unit">soles · por persona</div>
         <div class="precio-desc">Cuatro inscritos del mismo grupo.</div>
       </div>
