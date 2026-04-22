@@ -110,6 +110,10 @@
       padding: 8rem 2rem 4rem;
       position: relative;
       overflow: hidden;
+      background-image:
+        radial-gradient(circle, rgba(240,232,216,0.08) 1.2px, transparent 1.6px);
+      background-size: 30px 30px;
+      background-position: 0 0;
     }
     .hero-wrap {
       max-width: 1240px;
@@ -231,19 +235,31 @@
     .hero::before {
       content: '';
       position: absolute;
-      top: -25%; right: -15%;
-      width: 700px; height: 700px;
-      background: radial-gradient(circle, rgba(232,160,32,0.055) 0%, transparent 68%);
+      top: -20%; right: -18%;
+      width: 780px; height: 780px;
+      background: radial-gradient(circle, rgba(232,160,32,0.11) 0%, transparent 60%);
       pointer-events: none;
     }
     .hero::after {
       content: '';
       position: absolute;
-      bottom: 5%; left: -10%;
-      width: 400px; height: 400px;
-      background: radial-gradient(circle, rgba(200,16,46,0.04) 0%, transparent 70%);
+      bottom: -5%; left: -12%;
+      width: 520px; height: 520px;
+      background: radial-gradient(circle, rgba(200,16,46,0.08) 0%, transparent 65%);
       pointer-events: none;
     }
+
+    /* Soft glow behind the terminal window */
+    .hero-visual { position: relative; }
+    .hero-visual::before {
+      content: '';
+      position: absolute;
+      inset: -45% -35%;
+      background: radial-gradient(ellipse at center, rgba(232,160,32,0.22) 0%, rgba(232,160,32,0.05) 35%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .hero-visual > * { position: relative; z-index: 1; }
 
     .hero-eyebrow {
       font-family: var(--mono);
@@ -352,7 +368,7 @@
     .divider { height: 1px; background: var(--border); }
 
     /* ── SECTIONS ── */
-    section { padding: 5rem 0; }
+    section { padding: 5rem 0; position: relative; }
 
     .section-label {
       font-family: var(--mono);
