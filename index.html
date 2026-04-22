@@ -439,9 +439,9 @@
     }
     .dataset-item {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 2rem;
-      padding: 1.3rem 1.8rem;
+      padding: 1.5rem 1.8rem;
       border-bottom: 1px solid var(--border);
       transition: background 0.2s;
     }
@@ -455,11 +455,38 @@
       color: var(--accent);
       width: 56px;
       flex-shrink: 0;
+      margin-top: 0.35rem;
     }
+    .dataset-body { flex: 1; }
     .dataset-name {
       font-family: var(--display);
       font-size: 1.05rem;
       font-weight: 700;
+      margin-bottom: 0.3rem;
+    }
+    .dataset-desc {
+      font-size: 0.88rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+    }
+    .datasets-note {
+      margin-top: 1.5rem;
+      padding: 1.2rem 1.4rem;
+      border-left: 2px solid var(--accent);
+      background: rgba(232,160,32,0.04);
+      font-size: 0.88rem;
+      color: var(--text-dim);
+      line-height: 1.75;
+    }
+    .datasets-note strong {
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 500;
+      display: inline-block;
+      margin-right: 0.4rem;
     }
 
     /* ── METODOLOGÍA ── */
@@ -1019,21 +1046,37 @@
     <div class="datasets-list reveal">
       <div class="dataset-item">
         <span class="dataset-tag">Elec</span>
-        <span class="dataset-name">Data de elecciones</span>
+        <div class="dataset-body">
+          <div class="dataset-name">Data de elecciones</div>
+          <div class="dataset-desc">Obtenida de la ONPE. Aprenderás a descubrir y usar su API interna.</div>
+        </div>
       </div>
       <div class="dataset-item">
         <span class="dataset-tag">Cong</span>
-        <span class="dataset-name">Data del Congreso</span>
+        <div class="dataset-body">
+          <div class="dataset-name">Data del Congreso</div>
+          <div class="dataset-desc">Las votaciones están registradas en PDFs. Aprenderás a descargarlos sistemáticamente y procesarlos.</div>
+        </div>
       </div>
       <div class="dataset-item">
         <span class="dataset-tag">API</span>
-        <span class="dataset-name">API con autenticación</span>
+        <div class="dataset-body">
+          <div class="dataset-name">API con autenticación</div>
+          <div class="dataset-desc">Algunas APIs requieren clave. Vamos a aprender a conseguirlas y trabajar con ellas.</div>
+        </div>
       </div>
       <div class="dataset-item">
         <span class="dataset-tag">Min</span>
-        <span class="dataset-name">Data del REINFO</span>
+        <div class="dataset-body">
+          <div class="dataset-name">Data del REINFO</div>
+          <div class="dataset-desc">El Ministerio de Energía y Minas expone los datos mediante un buscador. Vamos a jalarlo entero.</div>
+        </div>
       </div>
     </div>
+
+    <p class="datasets-note reveal">
+      <strong>Importante:</strong> estas fuentes son casos emblemáticos elegidos porque cada una ilustra un tipo de problema que se repite en muchísimas otras — APIs sin documentar, PDFs semiestructurados, portales sin descarga masiva, autenticación obligatoria. Los métodos que aprendas acá aplican directamente a los datos que tú necesites para tus propios proyectos.
+    </p>
   </div>
 </section>
 
