@@ -167,6 +167,7 @@
       font-family: var(--mono);
       font-size: 0.78rem;
       line-height: 1.8;
+      min-height: 430px;
     }
     .term-prompt {
       color: var(--text);
@@ -393,6 +394,20 @@
     }
 
     /* ── MÓDULOS ── */
+    .modulos-intro {
+      max-width: 720px;
+      margin-bottom: 2.5rem;
+      font-size: 0.98rem;
+      line-height: 1.85;
+      color: var(--text-dim);
+    }
+    .modulos-intro p + p { margin-top: 1.1rem; }
+    .modulos-intro em {
+      color: var(--text);
+      font-style: normal;
+      font-weight: 500;
+    }
+
     .modulos-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -680,14 +695,14 @@
 
     /* ── TWEET SLIDER ── */
     .tweet-slider { margin-top: 2rem; }
-    .tweet-track { overflow: hidden; }
+    .tweet-track { overflow: hidden; width: 100%; }
     .tweet-slides-inner {
       display: flex;
       transition: transform 0.35s ease;
     }
     .tweet-slide {
-      min-width: 100%;
-      flex-shrink: 0;
+      flex: 0 0 100%;
+      min-width: 0;
       display: flex;
       justify-content: center;
     }
@@ -696,6 +711,7 @@
       border: 1px solid var(--border);
       padding: 1.4rem 1.6rem;
       max-width: 560px;
+      width: 100%;
       text-decoration: none;
       display: block;
       transition: border-color 0.2s;
@@ -890,6 +906,55 @@
     }
     .reveal.visible { opacity: 1; transform: translateY(0); }
 
+    /* ── MOBILE ── */
+    @media (max-width: 560px) {
+      /* Terminal reserves more vertical space on mobile (prompts wrap to more lines) */
+      .term-body { min-height: 500px; font-size: 0.72rem; padding: 1.2rem 1.2rem 1.3rem; }
+      .term-chart { margin-top: 1.1rem; padding: 0.9rem 0.8rem 0.5rem; }
+      .term-prompt { min-height: 3.2em; }
+
+      /* Módulos: horizontal, compacto, con el ícono a la izquierda */
+      .modulos-grid { grid-template-columns: 1fr; gap: 1px; }
+      .modulo-card {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        align-items: center;
+        column-gap: 1rem;
+        row-gap: 0.1rem;
+        padding: 0.9rem 1.2rem;
+      }
+      .modulo-icon {
+        grid-row: span 2;
+        margin-bottom: 0;
+        line-height: 0;
+        opacity: 0.9;
+      }
+      .modulo-icon svg { width: 22px; height: 22px; display: block; }
+      .modulo-num {
+        margin-bottom: 0;
+        font-size: 0.58rem;
+        align-self: end;
+      }
+      .modulo-name {
+        font-size: 0.93rem;
+        line-height: 1.3;
+        align-self: start;
+      }
+
+      /* Tarjetas de tweets: más compactas */
+      .tweet-card { padding: 1rem 1.1rem; }
+      .tweet-card-avatar { width: 36px; height: 36px; }
+      .tweet-card-header { gap: 0.55rem; margin-bottom: 0.75rem; }
+      .tweet-card-name { font-size: 0.85rem; }
+      .tweet-card-handle { font-size: 0.62rem; }
+      .tweet-card-text { font-size: 0.85rem; line-height: 1.6; margin-bottom: 0.75rem; }
+      .tweet-card-media { max-height: 200px; margin-bottom: 0.75rem; }
+      .tweet-card-footer { padding-top: 0.55rem; }
+      .tweet-card-stats { gap: 0.7rem; }
+      .tweet-card-stat { font-size: 0.68rem; }
+      .tweet-card-date { font-size: 0.6rem; }
+    }
+
     /* ── SCROLLBAR ── */
     ::-webkit-scrollbar { width: 3px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
@@ -986,6 +1051,12 @@
   <div class="container">
     <p class="section-label reveal">Contenido</p>
     <h2 class="reveal">Lo que vas a aprender</h2>
+
+    <div class="modulos-intro reveal">
+      <p>El mundo de la IA evoluciona rápidamente, y los agentes se han convertido en una ventaja importante para la productividad de cualquier trabajador del conocimiento. No solo aceleran tareas: permiten que personas sin formación en programación produzcan herramientas y análisis customizados, algo que hasta hace poco estaba reservado a programadores.</p>
+      <p>Esta productividad, sin embargo, requiere una pequeña inversión de tiempo. Para dirigir un agente con criterio hace falta conocimiento del sistema: cómo está estructurada una web, qué es realmente un PDF, cómo funciona una API. Este taller te entrega esos conocimientos elementales de forma concentrada.</p>
+    </div>
+
     <div class="modulos-grid reveal">
       <div class="modulo-card">
         <div class="modulo-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
@@ -1048,28 +1119,28 @@
         <span class="dataset-tag">Elec</span>
         <div class="dataset-body">
           <div class="dataset-name">Data de elecciones</div>
-          <div class="dataset-desc">Obtenida de la ONPE. Aprenderás a descubrir y usar su API interna.</div>
+          <div class="dataset-desc">La ONPE no ofrece una API pública, aunque su portal consume una internamente. Aprenderás a descubrir esos endpoints ocultos y consumirlos directamente.</div>
         </div>
       </div>
       <div class="dataset-item">
         <span class="dataset-tag">Cong</span>
         <div class="dataset-body">
           <div class="dataset-name">Data del Congreso</div>
-          <div class="dataset-desc">Las votaciones están registradas en PDFs. Aprenderás a descargarlos sistemáticamente y procesarlos.</div>
+          <div class="dataset-desc">Las votaciones del Pleno solo existen como PDFs semiestructurados. Aprenderás a automatizar la descarga de miles de actas y a extraer los votos individuales con precisión.</div>
         </div>
       </div>
       <div class="dataset-item">
         <span class="dataset-tag">API</span>
         <div class="dataset-body">
           <div class="dataset-name">API con autenticación</div>
-          <div class="dataset-desc">Algunas APIs requieren clave. Vamos a aprender a conseguirlas y trabajar con ellas.</div>
+          <div class="dataset-desc">Las APIs profesionales exigen credenciales y aplican límites de uso. Dominarás el flujo completo — obtener claves, firmar requests y operar dentro de sus rate limits.</div>
         </div>
       </div>
       <div class="dataset-item">
         <span class="dataset-tag">Min</span>
         <div class="dataset-body">
           <div class="dataset-name">Data del REINFO</div>
-          <div class="dataset-desc">El Ministerio de Energía y Minas expone los datos mediante un buscador. Vamos a jalarlo entero.</div>
+          <div class="dataset-desc">El Ministerio de Energía y Minas expone el REINFO únicamente a través de un buscador, sin descarga masiva. Aprenderás a paginarlo sistemáticamente y reconstruir el dataset completo.</div>
         </div>
       </div>
     </div>
@@ -1373,7 +1444,7 @@
 <!-- CTA FINAL -->
 <div class="cta-block">
   <div class="container">
-    <h2 class="reveal">¿Listo para empezar?</h2>
+    <h2 class="reveal">¿Empezamos?</h2>
     <p class="reveal">Cupos limitados. Lima, 2 y 9 de mayo de 2025.</p>
     <a href="https://wa.me/51964847543?text=Hola%2C%20me%20interesa%20inscribirme%20al%20Taller%20de%20Investigaci%C3%B3n%20Emp%C3%ADrica%20con%20IA" target="_blank" class="cta-btn reveal">
       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;margin-right:8px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
